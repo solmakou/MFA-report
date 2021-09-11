@@ -1,13 +1,15 @@
 #MFA
     #Get them users
-    $Users = Get-MsolUser -all -EnabledFilter EnabledOnly | Where-Object { $_.UserType -ne "Guest" -and $_.IsLicensed -eq $true}
+    $Users = Get-MsolUser -all -EnabledFilter EnabledOnly | 
+        Where-Object { $_.UserType -ne "Guest" -and $_.IsLicensed -eq $true}
     #Start that report
     $Report = [System.Collections.Generic.List[Object]]::new()
 
     ForEach ($User in $Users){
         #find them variables
         $MFAMethodType = $User.StrongAuthenticationMethods.MethodType
-        $DefaultMFAMethod = ($User.StrongAuthenticationMethods | where-object {$User.StrongAuthenticationMethods.IsDefault -eq "True"}).MethodType
+        $DefaultMFAMethod = ($User.StrongAuthenticationMethods | 
+            where-object {$User.StrongAuthenticationMethods.IsDefault -eq "True"}).MethodType
         $MFAState = $User.StrongAuthenticationRequirements.State
         $MFAEmail = $User.StrongAuthenticationUserDetails.Email
         $MFAPhoneNumber = $User.StrongAuthenticationUserDetails.PhoneNumber
@@ -18,7 +20,7 @@
         $MFAPhoneAppVersion = $User.StrongAuthenticationPhoneAppDetails.PhoneAppVersion
         $MFAStatus = $User.StrongAuthenticationRequirements.State
 
-#Populate them variables for the report
+        #Populate them variables for the report -join for fields with multiple results
         $ReportLine = [PSCustomObject] @{
             User = $User.UserPrincipalName
             MFAStatus = $MFAStatus
@@ -39,4 +41,7 @@
         $Report.Add($ReportLine)
     }
     #export that csv
-    $Report | Select Name, User, DefaultMFAMethod, MFAMethodType, MFAState, MFAPhoneNumber, Office, MFAStatus, MFADeviceName, MFAEmail, MFAUsed, MFADeviceTag, MFADeviceToken, MFANotificationType, MFAPhoneAppVersion | Sort Name | Export-CSV -NoTypeInformation c:\temp\MFAUsers.csv
+    $Report | 
+        Select-Object Name, User, DefaultMFAMethod, MFAMethodType, MFAState, MFAPhoneNumber, Office, MFAStatus, MFADeviceName, MFAEmail, MFAUsed, MFADeviceTag, MFADeviceToken, MFANotificationType, MFAPhoneAppVersion | 
+        Sort-Object Name | 
+        Export-CSV -NoTypeInformation c:\temp\MFAUsers.csv
