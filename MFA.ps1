@@ -1,5 +1,6 @@
-#MFA
-    #Get them users
+#MFA - Requires MSOnline module as well as a connection to AAD (Connect-MsolService)
+    #Get them users that are licensed and not guests.
+    $ExportFile = "c:\temp\MFAUsers.csv"
     $Users = Get-MsolUser -all -EnabledFilter EnabledOnly | 
         Where-Object { $_.UserType -ne "Guest" -and $_.IsLicensed -eq $true}
     #Start that report
@@ -44,4 +45,4 @@
     $Report | 
         Select-Object Name, User, DefaultMFAMethod, MFAMethodType, MFAState, MFAPhoneNumber, Office, MFAStatus, MFADeviceName, MFAEmail, MFAUsed, MFADeviceTag, MFADeviceToken, MFANotificationType, MFAPhoneAppVersion | 
         Sort-Object Name | 
-        Export-CSV -NoTypeInformation c:\temp\MFAUsers.csv
+        Export-CSV -NoTypeInformation $ExportFile
